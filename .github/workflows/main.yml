@@ -3,7 +3,7 @@ on: [push]
 jobs:
   check-bats-version:
     runs-on:
-      labels: ubuntu-24.04-16core
+      labels: ubuntu-latest-xlarge
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

